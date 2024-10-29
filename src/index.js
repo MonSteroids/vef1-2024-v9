@@ -71,26 +71,33 @@ function renderResults(location, results) {
   const header = el(
     'tr',
     {},
-    el('th', {}, 'Tími'),
-    el('th', {}, 'Hiti'),
-    el('th', {}, 'Úrkoma'),
+    el('th', {}, 'Klukkutími'),
+    el('th', {}, 'Hiti (°C)'),
+    el('th', {}, 'Úrkoma (mm)'),
   );
   console.log(results);
-  const body = el(
-    'tr',
-    {},
-    el('td', {}, 'Tími'),
-    el('td', {}, 'Hiti'),
-    el('td', {}, 'Úrkoma'),
+  // ChatGPT var notað héðan...
+  // OpenAI. (2024). ChatGPT (Október 2024, Útgáfa) [Stórt mállíkan].
+  const body = results.map(result =>
+    el(
+      'tr',
+      {},
+      el('td', {}, new Date(result.time).toLocaleTimeString('is-IS', { hour: '2-digit', minute: '2-digit' })),
+      el('td', {}, `${result.temperature.toFixed(1)}`),
+      el('td', {}, `${result.precipitation.toFixed(1)}`)
+    )
   );
 
-  const resultsTable = el('table', { class: 'forecast' }, header, body);
-
+  const tableBody = el('tbody', {}, ...body);
+  const resultsTable = el('table', { class: 'forecast' }, header, tableBody);
+  // ...til hingað.
   renderIntoResultsContent(
     el(
       'section',
       {},
-      el('h2', {}, `Leitarniðurstöður fyrir: ${location.title}`),
+      el('h2', {}, 'Niðurstöður'),
+      el('p', {}, el('strong', {}, `${location.title}`)),
+      el('p', {}, `Spá fyrir daginn á breiddargráðu ${location.lat} og lengdargráðu ${location.lng}.`),
       resultsTable,
     ),
   );
@@ -188,14 +195,21 @@ function render(container, locations, onSearch, onSearchMyLocation) {
   // Búum til <header> með beinum DOM aðgerðum
   const headerElement = document.createElement('header');
   const heading = document.createElement('h1');
-  heading.appendChild(document.createTextNode('<fyrirsögn>'));
+  heading.appendChild(document.createTextNode('🌤️ Veðrið 🌨️'));
   headerElement.appendChild(heading);
   parentElement.appendChild(headerElement);
 
   // TODO útfæra inngangstexta
+  const underHeader = document.createElement('p');
+  underHeader.textContent = 'Veldu stað til að sjá hita- og úrkomuspá.';
+  headerElement.appendChild(underHeader);
   // Búa til <div class="loctions">
   const locationsElement = document.createElement('div');
   locationsElement.classList.add('locations');
+
+  const locationHeader = document.createElement('h2');
+  locationHeader.textContent = 'Staðsetningar';
+  locationsElement.appendChild(locationHeader);
 
   // Búa til <ul class="locations__list">
   const locationsListElement = document.createElement('ul');
